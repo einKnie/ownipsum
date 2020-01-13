@@ -1,13 +1,10 @@
 #include "replacer.h"
 #include <stdlib.h>
+#include <string.h>
 
 Replacer::Replacer(unsigned int maxLen) {
   m_maxLen = maxLen;
   m_output = (char*)malloc(m_maxLen * sizeof(char));
-
-  // m_startChar = 'm';
-  // m_longVowel = 'u';
-  // m_endChar = 'h';
 
   m_start = 'm';
   m_middle = 'u';
@@ -24,14 +21,6 @@ Replacer::Replacer() : Replacer(MAXLEN) {
 Replacer::~Replacer() {
   if (m_output) free(m_output);
 }
-
-// bool Replacer::setText(const char start, const char vowel, const char end) {
-//   m_startChar = start;
-//   m_longVowel = vowel;
-//   m_endChar = end;
-//   log_dbg("set replacement word to: %c%c%c\n", m_startChar, m_longVowel, m_endChar);
-//   return true;
-// }
 
 bool Replacer::setText(const char start, const char middle, const char end, int vIdx) {
   m_start = start;
@@ -142,47 +131,36 @@ void Replacer::replaceWord(char *word) {
   uint8_t wlen = strlen(word);
 
   if (wlen < 1) {
-    log_dbg("word shorter than startchar\n");
+    log_dbg("word is no word\n");
     return;
   }
 
-  uint8_t vowel_idx = 1;
-  uint8_t vowel_len = wlen - 2;
-  uint8_t mid_idx = 2;
+  uint8_t mid_idx = 1;
   uint8_t end_idx = wlen - 1;
   char c = '\0';
 
-  log_dbg("wlen: %d\nvowel_idx: %d\nvowel_len: %d\nend_idx: %d\n",
-          wlen, vowel_idx, vowel_len, end_idx);
-
-  // for (uint8_t i = 0; i < wlen; i++) {
-  //
-  //   if (isNumeric(word[i])) continue;
-  //
-  //   if (i < 1) {
-  //     c = m_startChar;
-  //   } else if ((i >= end_idx) && (wlen > 2)) {
-  //     c = m_endChar;
-  //   } else {
-  //     c = m_longVowel;
-  //   }
-  //
-  //   word[i] = isUpper(word[i]) ? toUpper(c) : c;
-  // }
-
+  // set letter indices depending on which one is the vowel
   if (m_vowel == &m_start) {
-    vowel_idx = 0;
     mid_idx = wlen - 2;
     end_idx = wlen - 1;
   } else if (m_vowel == &m_middle) {
-    vowel_idx = 1;
     mid_idx = 1;
     end_idx = wlen - 1;
   } else if (m_vowel == &m_end) {
-    vowel_idx = 2;
     mid_idx = 1;
     end_idx = 2;
+  } else {
+    log_dbg("invalid vowel\n");
   }
+
+  // hack to make sure a two-letter word is replaces as 'mu' instead of 'mh'
+  // TODO: improve
+  if (wlen < 3) {
+    end_idx = 3;
+  }
+
+  log_dbg("wlen: %d\nmid_idx: %d\nend_idx: %d\n",
+          wlen, vowel_idx, mid_idx, end_idx);
 
   for (uint8_t i = 0; i < wlen; i++) {
 

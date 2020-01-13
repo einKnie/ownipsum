@@ -4,7 +4,6 @@
 #define _REPLACER_H_
 
 #include <stdint.h>
-#include <string.h>
 #include <stdio.h>
 
 #define MAXLEN 200
@@ -65,6 +64,9 @@ public:
   Replacer(unsigned int maxLen);
   ~Replacer();
 
+  // set the replacement string.
+  // each char must be given individually, vIdx should be the index of the long vowel (start = 0)
+  // TODO: improve
   bool setText(const char start, const char middle, const char end, int vIdx);
 
   // return a modified version of the input string
