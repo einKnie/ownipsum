@@ -214,6 +214,7 @@ void Replacer::replaceWord(char *word) {
       if (end_idx == 0) break;
     }
 
+    // check if there's still enough room for end part
     if ( (end_idx <= mid_idx) || ((end_idx - mid_idx) < (getWordSpecialFromUntil(word, mid_idx, end_idx) + 1)) ) {
       end_idx = wlen;
     }
@@ -241,10 +242,8 @@ void Replacer::replaceWord(char *word) {
 
   for (uint8_t i = 0; i < wlen; i++) {
 
-    if (isNumeric(word[i])) continue;
-    if (isWordSpecial(word[i])) {
-      continue;
-    }
+    if (isNumeric(word[i]) || isWordSpecial(word[i])) continue;
+
     if (i < mid_idx) {
       special_offs = getWordSpecialFromUntil(word, 0, i);
       c = m_start[i - special_offs];
