@@ -5,12 +5,7 @@
 Replacer::Replacer(unsigned int maxLen) {
   m_maxLen = maxLen;
   m_output = (char*)malloc(m_maxLen * sizeof(char));
-
-  // set defaults
-  sprintf(m_start, "%s", START);
-  memset(m_middle, MID[0], sizeof(m_middle) - 1); // use memset to fill entire array
-  sprintf(m_end,   "%s", END);
-  m_vowel = &m_middle[0];
+  setDefaultText();
 
   log_dbg("Created replacer w/ max length %d\n", m_maxLen);
 }
@@ -23,14 +18,26 @@ Replacer::~Replacer() {
   if (m_output) free(m_output);
 }
 
+void Replacer::setDefaultText() {
+  memset(m_start, '\0', sizeof(m_start));
+  memset(m_middle, '\0', sizeof(m_middle));
+  memset(m_end, '\0', sizeof(m_end));
+
+  sprintf(m_start, "%s", START);
+  memset (m_middle, MID[0], sizeof(m_middle) - 1); // use memset to fill entire array
+  sprintf(m_end,   "%s", END);
+  m_vowel = &m_middle[0];
+}
+
 bool Replacer::setText(const char *str, unsigned int vIdx) {
 
   unsigned int wlen = strlen(str);
   char text[wlen + 1] = {'\0'};
-  memcpy(text, str, wlen + 1);
+  memcpy(text, str, wlen);
 
   if (!isValidReplacement(text)) {
-    printf("Error: Replacement word is invalid.\nFalling back to sane defaults\n");
+    printf("Error: Replacement word \"%s\" is invalid.\nFalling back to sane defaults\n", str);
+    setDefaultText();
     return false;
   }
 
@@ -57,7 +64,7 @@ bool Replacer::setText(const char *str, unsigned int vIdx) {
     m_vowel = m_middle;
   }
 
-  log_dbg("set replacement word to %s %s %s, with %s being the vowel\n", m_start, m_middle, m_end, m_vowel);
+  log_dbg("set replacement word to %s %s %s, with %.1s being the vowel\n", m_start, m_middle, m_end, m_vowel);
   return true;
 }
 
@@ -65,8 +72,8 @@ char* Replacer::change(const char *fmt) {
 
   char word[m_maxLen];  // world length is same as line length b/c we could have just one 'word'
   states_e state = EInit;
-  int8_t ccnt = 0;
-  int8_t wcnt = 0;
+  int16_t ccnt = 0;
+  int16_t wcnt = 0;
 
   while (state != EDone) {
 
@@ -102,7 +109,7 @@ char* Replacer::change(const char *fmt) {
         do {
           m_output[ccnt] = fmt[ccnt];
           ccnt++;
-        } while (fmt[ccnt] != ' ');
+        } while ((fmt[ccnt] != ' ') && (fmt[ccnt] != '\0'));
 
         state = ECheck;
         break;
@@ -114,7 +121,7 @@ char* Replacer::change(const char *fmt) {
           word[wcnt] = fmt[ccnt];
           wcnt++;
           ccnt++;
-        } while ((fmt[ccnt] != ' ') && !isSpecial(fmt[ccnt]));
+        } while ((fmt[ccnt] != ' ') && (fmt[ccnt] != '\0') && !isSpecial(fmt[ccnt]));
         word[wcnt] = '\0';
 
         // replace word
@@ -289,6 +296,10 @@ bool Replacer::isSpecial(char c) {
        (c == ':') ||
        (c == ';') ||
        (c == '=') ||
+       (c == '{') ||
+       (c == '}') ||
+       // (c == '(') ||
+       // (c == ')') ||
        (c == '\n')||
        (c == '\t') ) return true;
 
@@ -298,6 +309,14 @@ bool Replacer::isSpecial(char c) {
 bool Replacer::isWordSpecial(char c) {
   if ( ( c == '\'') ||
        ( c == '\"') ||
+       ( c == '#')  ||
+       ( c == '/')  ||
+       ( c == '\\')  ||
+       ( c == '[')  ||
+       ( c == ']')  ||
+       ( c == '&')  ||
+       ( c == '<')  ||
+       ( c == '>')  ||
        ( c == '(')  ||
        ( c == ')')  ) return true;
   return false;

@@ -44,6 +44,9 @@ private:
   unsigned int m_maxLen;
   char *m_output; // placeholder for current replaced text
 
+  // revert to default replacement text
+  void setDefaultText();
+
   // return uppercase version of input char
   char toUpper(char c);
   // check if input char is uppercase

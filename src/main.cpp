@@ -1,42 +1,81 @@
 #include "replacer.h"
 
+// #define TESTBUILD
+#ifndef TESTBUILD
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <string.h>
+
+void printHelp() {
+  printf("arguments needed:\n");
+  printf(" -s  ... replacement string\n");
+  printf(" -i  ... index of long vowel\n");
+  printf("example: -s \"muh\" - i 1 => mu(uuu...)h\n");
+}
+
+int main(int argc, char *argv[]) {
+
+  Replacer *rep            = NULL;
+  char      repstr[MAXLEN] = {'\0'};
+  int       vIdx           = -1;
+
+  // get parameters
+  int opt;
+  while ((opt = getopt(argc, argv, "s:i:v")) != -1) {
+    switch(opt) {
+      case 's':
+        // 'string'
+        printf("Got replacement string %s\n", optarg);
+        strncpy(repstr, optarg, MAXLEN - 1);
+        break;
+      case 'i':
+        // 'vowel index'
+        printf("Long vowel at position %d\n", atoi(optarg));
+        vIdx = atoi(optarg);
+        break;
+      case 'v':
+        printf("verbose mode [ not available yet ]\n");
+      default:
+        printHelp();
+        break;
+    }
+  }
+
+  if ((repstr[0] == '\0') || (vIdx == -1)) {
+    printHelp();
+    exit (1);
+  }
+
+  rep = new Replacer();
+  rep->setText(repstr, vIdx);
+
+  size_t size = 0;
+  char  *line = NULL;
+  while ((getline(&line, &size, stdin)) > -1) {
+    printf("%s\n", rep->change(line));
+  }
+
+  printf("\nALL DONE\n");
+  delete rep;
+  return 0;
+}
+
+#else
+
 typedef struct testword {
-  char rep[10];
+  char    rep[10];
   uint8_t vIdx;
 } testword_t;
 
-int main(void) {
+int main(int argc, char *argv[]) {
 
-  Replacer *rep = new Replacer();
-  // rep->setText('m', 'u', 'h', 1);
-  // rep->setText("plan", 2);
-  // rep->setText("mama", 3);
+  Replacer *rep = NULL;
 
-  rep->setText("muh", 1);
-  printf("%s\n",   rep->change("Let's try to replace everything with \"mu(uuu)h\"."));
-
-  rep->setText("ach", 0);
-  printf("%s\n",   rep->change("Let's try to replace everything with \"mu(uuu)h\"."));
-
-  rep->setText("bla", 2);
-  printf("%s\n",   rep->change("Let's try to replace everything with \"mu(uuu)h\"."));
-
-  rep->setText("mama", 1);
-  printf("%s\n",   rep->change("Let's try to replace everything with \"mu((uuu))h\"."));
-
-  rep->setText("mama", 3);
-  printf("%s\n",   rep->change("Let's try to replace everything with \"mu((uuu))h\"."));
-
-  rep->setText("aber", 0);
-  printf("%s\n",   rep->change("Let's try to replace everything with \"mu((uuu))h\"."));
-  printf("%s\n", rep->change("Let's try to replace everything with (\"mu((uuu))h\")."));
-
-
-  // printf("%s",   rep->change("Ich weiss gar nicht, wieso %s sich so ziert!\n"));
-// #ifdef _NO_DEBUG_
-
+  rep = new Replacer();
   testword_t words[] = {{"muh", 1}, {"ach", 0}, {"bla", 2}, {"mama", 1}, {"mama", 3}, {"aber", 0}};
-  uint8_t nWords = 6;
+  uint8_t    nWords  = 6;
 
   for (uint8_t i = 0; i < nWords; i++) {
     printf("Using replacement word %s(%d)\n", words[i].rep, words[i].vIdx);
@@ -55,13 +94,12 @@ int main(void) {
     printf("%s\n", rep->change("Let's try to replace everything with (\"mu((\"uuu\"))h\")."));
     printf("%s\n", rep->change("Let's try to replace everything with (\"mu(\"(\"uuu\")u)h\"\")."));
     printf("%s\n", rep->change("\"(O)\"))h)\"\""));
+    printf("%s\n", rep->change("Aber schau mal: \"\"(/<<bla>>\"\\a<&o>)"));
 
     printf("\n");
   }
 
-
-// #endif
-
   delete rep;
   return 0;
 }
+#endif
