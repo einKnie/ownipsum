@@ -1,6 +1,7 @@
 BASE        = ..
 SRC_DIR     = $(BASE)/src
 INC_DIR     = $(BASE)/inc
+INC_DIR_ADD = $(BASE)/../lilist/
 LIB_DIR     = $(BASE)/../libraries/log
 TARGET_DIR  = $(BASE)/bin
 OBJ_DIR     = $(BASE)/obj
@@ -10,10 +11,9 @@ CXX = g++
 
 LIBS = -lcpplogging
 LIBFLAGS = -I$(LIB_DIR)/inc -L$(LIB_DIR)/bin $(LIBS)
-CFLAGS = -std=c++11 -Wall -Werror -g -I$(INC_DIR)
+CFLAGS = -std=c++11 -Wall -Werror -g -I$(INC_DIR) -I$(INC_DIR_ADD)
 
 SRCS       := $(wildcard $(SRC_DIR)/*.cpp)
-
 OBJ         = $(patsubst $(SRC_DIR)/%.cpp, $(OBJ_DIR)/%.o, $(SRCS))
 DEPS        = $(patsubst %, $(INC_DIR)/%.h, *)
 

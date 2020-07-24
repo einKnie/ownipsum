@@ -1,6 +1,12 @@
 #include "replacer.h"
 
-// #define TESTBUILD
+#define TESTBUILD
+#define MULTIREP
+
+#if defined TESTBUILD && defined  MULTIREP
+#include "multiReplacer.h"
+#endif
+
 #ifndef TESTBUILD
 
 #include <stdio.h>
@@ -71,6 +77,14 @@ typedef struct testword {
 
 int main(int argc, char *argv[]) {
 
+# ifdef MULTIREP
+  MultiReplacer *rep = NULL;
+
+  repWord_t words[] = {{"muh", 1}, {"achso", 0}, {"bla", 2}, {"oh", 0}, {"ah", 0}, {"jo", 1}, {"mama", 1}, {"foto", 3}, {"yippie", 4}, {"alternate", 0}};
+  rep = new MultiReplacer(words, 10);
+
+
+# else
   Replacer *rep = NULL;
 
   rep = new Replacer();
@@ -80,6 +94,8 @@ int main(int argc, char *argv[]) {
   for (uint8_t i = 0; i < nWords; i++) {
     printf("Using replacement word %s(%d)\n", words[i].rep, words[i].vIdx);
     rep->setText(words[i].rep, words[i].vIdx);
+
+#  endif // multirep
 
     printf("%s\n", rep->change("Um 15:00 gegen Norden ziehen, das wärs..."));
     printf("%s\n", rep->change("Alles nur nicht 17:45 am Sonntag! Du hast deine %d Tassen verloren?"));
@@ -97,7 +113,10 @@ int main(int argc, char *argv[]) {
     printf("%s\n", rep->change("Aber schau mal: \"\"(/<<bla>>\"\\a<&o>)"));
 
     printf("\n");
+
+# ifndef MULTIREP
   }
+# endif // multirep
 
   delete rep;
   return 0;
