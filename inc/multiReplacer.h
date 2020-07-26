@@ -1,31 +1,32 @@
 #ifndef _MULTI_REPLACER_H_
 #define _MULTI_REPLACER_H_
 
-/* idea:
- *  - multiple rep string
- *  - for each word, most suitable rep string is determined (for now, by length alone)
- *  - this should result in a 'lorem ipsum'-like output text
- */
-
 #include "replacerBase.h"
 #include "lilist.h"
 #include <string.h>
 
 typedef struct RepWord {
-  char word[MAXLEN];
+  char word[MAX_REPLEN];
   unsigned int idx;
 
-  friend bool operator== (const RepWord &lhs, const RepWord &rhs) {
-    return (strlen(lhs.word) == strlen(rhs.word));
+  RepWord(const char *word, unsigned int idx) {
+    strncpy(this->word, word, sizeof(this->word));
+    this->idx = idx;
   }
-  friend bool operator< (const RepWord &lhs, const RepWord &rhs) {
-    return (strlen(lhs.word) < strlen(rhs.word));
+
+  RepWord() : RepWord("\0", 0) { }
+
+  bool operator== (const RepWord &other) {
+    return (strlen(word) == strlen(other.word));
   }
-  friend bool operator>(const RepWord &lhs, const RepWord &rhs) {
-    return (strlen(lhs.word) > strlen(rhs.word));
+  bool operator< (const RepWord &other) {
+    return (strlen(word) < strlen(other.word));
   }
-  friend bool operator!= (const RepWord &lhs, const RepWord &rhs) {
-    return (strlen(lhs.word) != strlen(rhs.word));
+  bool operator> (const RepWord &other) {
+    return (strlen(word) > strlen(other.word));
+  }
+  bool operator!= (const RepWord &other) {
+    return (strlen(word) != strlen(other.word));
   }
 
 } repWord_t;
@@ -38,13 +39,16 @@ private:
   void replaceWord(char* word);
   bool findRepStr(char* word, repWord_t **rep);
 
+  bool isExactMatch(repWord_t *orig, repWord_t *rep);
+  bool isApproximateShorterMatch(repWord_t *orig, repWord_t *rep);
+  bool isApproximateLongerMatch(repWord_t *orig, repWord_t *rep);
+  bool isShorter(repWord_t *orig, repWord_t *rep);
+  bool isLonger(repWord_t *orig, repWord_t *rep);
+
 public:
 
   MultiReplacer(repWord_t *reps, uint8_t n);
   ~MultiReplacer();
-
-  bool addWord(repWord_t &rep);
-  bool remWord(repWord_t &rep);
 
 };
 

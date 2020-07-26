@@ -1,18 +1,19 @@
-#include "replacer.h"
 
-#define TESTBUILD
+// #define TESTBUILD
 #define MULTIREP
 
-#if defined TESTBUILD && defined  MULTIREP
-#include "multiReplacer.h"
+#if defined MULTIREP
+# include "multiReplacer.h"
+#else
+# include "replacer.h"
 #endif
 
 #ifndef TESTBUILD
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <unistd.h>
-#include <string.h>
+# include <stdio.h>
+# include <stdlib.h>
+# include <unistd.h>
+# include <string.h>
 
 void printHelp() {
   printf("arguments needed:\n");
@@ -23,13 +24,22 @@ void printHelp() {
 
 int main(int argc, char *argv[]) {
 
-  Replacer *rep            = NULL;
-  char      repstr[MAXLEN] = {'\0'};
-  int       vIdx           = -1;
+#ifdef MULTIREP
+  // additional command line parameter? for words to use (for user simplicity, maybe as file?)
+  MultiReplacer *rep = NULL;
+  char optstr[]      = "s:i:vf:";
+  FILE *fd           = NULL;
+#else
+  Replacer *rep       = NULL;
+  char optstr[]       = "s:i:v";
+#endif
+
+  char repstr[MAXLEN] = {'\0'};
+  int  vIdx           = -1;
 
   // get parameters
   int opt;
-  while ((opt = getopt(argc, argv, "s:i:v")) != -1) {
+  while ((opt = getopt(argc, argv, optstr)) != -1) {
     switch(opt) {
       case 's':
         // 'string'
@@ -43,11 +53,24 @@ int main(int argc, char *argv[]) {
         break;
       case 'v':
         printf("verbose mode [ not available yet ]\n");
+        break;
+#ifdef MULTIREP
+      case 'f':
+        printf("reading rep words from file %s\n", optarg);
+        fd = fopen(optarg, "r");
+        if (fd == NULL) {
+          printf("error: could not open word file\n");
+          exit(1);
+        }
+        break;
+#endif
       default:
         printHelp();
         break;
     }
   }
+
+#ifndef MULTIREP
 
   if ((repstr[0] == '\0') || (vIdx == -1)) {
     printHelp();
@@ -57,18 +80,63 @@ int main(int argc, char *argv[]) {
   rep = new Replacer();
   rep->setText(repstr, vIdx);
 
+#else
+
+if (!fd) {
+  printHelp();
+  exit(1);
+}
+  // read words from file
+  repWord_t *words = NULL;
+  int nWords = 0;
+  char *wline = NULL;
+  size_t n = 0;
+
+  while (getline(&wline, &n, fd) > 0) {
+    printf("%s\n", wline);
+    nWords++;
+  }
+
+  words = (repWord_t*)malloc(nWords * sizeof(repWord_t));
+  rewind(fd);
+  free(wline);
+  n= 0;
+  for (int i = 0; i < nWords; i++) {
+    if (getline(&wline, &n, fd) < 0) {
+      printf("error reading line %d\n", i);
+      fclose(fd);
+      free(wline);
+      free(words);
+      exit(1);
+    }
+
+    char* word = strtok(wline, " ");
+    vIdx = atoi(strtok(NULL, " \n"));
+    printf("read word: %s(%d)\n", word, vIdx);
+    strncpy(words[i].word, word, sizeof(words[i].word));
+    words[i].idx = vIdx;
+  }
+
+  rep = new MultiReplacer(words, nWords);
+  free(wline);
+  free(words);
+  fclose(fd);
+#endif
+
+
   size_t size = 0;
   char  *line = NULL;
   while ((getline(&line, &size, stdin)) > -1) {
-    printf("%s\n", rep->change(line));
+    printf("%s", rep->change(line));
   }
+  free(line);
 
   printf("\nALL DONE\n");
   delete rep;
   return 0;
 }
 
-#else
+#else // TESTBUILD
 
 typedef struct testword {
   char    rep[10];
