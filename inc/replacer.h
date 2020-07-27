@@ -6,7 +6,7 @@
 class Replacer : public ReplacerBase {
 private:
 
-  void replaceWord(char *word);
+  bool replaceWord(char *word);
 
 public:
   Replacer();

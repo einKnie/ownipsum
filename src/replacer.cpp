@@ -14,6 +14,7 @@ Replacer::~Replacer() {
   log_dbg("destroyed single-word replacer\n");
 }
 
-void Replacer::replaceWord(char *word) {
+bool Replacer::replaceWord(char *word) {
   replaceSingleWord(word);
+  return true;
 }

@@ -36,7 +36,16 @@ private:
 
   LiList<repWord_t> *m_words;
 
-  void replaceWord(char* word);
+  /// @brief Replace a given word \a word with a suitable replacement
+  /// @param [in/out] word
+  bool replaceWord(char* word);
+
+  /// @brief Find a suiting replacement for a given \a word
+  /// @param [in] word
+  /// @param [in/out] rep will hold a reference to the found
+  /// replacement word after successful call
+  /// @return true on success, false on failure
+  /// @note \a rep should not be allocated beforehand and does not need to be freed after use.
   bool findRepStr(char* word, repWord_t **rep);
 
   bool isExactMatch(repWord_t *orig, repWord_t *rep);

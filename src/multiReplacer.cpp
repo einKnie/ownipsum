@@ -16,19 +16,20 @@ MultiReplacer::~MultiReplacer() {
   log_dbg("destroyed multi-replacer\n");
 }
 
-void MultiReplacer::replaceWord(char *word) {
+bool MultiReplacer::replaceWord(char *word) {
   repWord_t *rep;
   if (!findRepStr(word, &rep)) {
     printf("error: could not find a suitable rep string for word %s\n", word);
-    return;
+    return false;
   }
 
   if (!setText(rep->word, rep->idx)) {
     printf("error: failed to set replacement word %s(%d)\n", rep->word, rep->idx);
-    return;
+    return false;
   }
 
   replaceSingleWord(word);
+  return true;
 }
 
 bool MultiReplacer::findRepStr(char *word, repWord_t **rep) {
@@ -36,7 +37,7 @@ bool MultiReplacer::findRepStr(char *word, repWord_t **rep) {
 
   // find correct-length rep words even with in-word specials by
   // 1. get no of specials in word
-  // 2. set fndrep word to this length
+  // 2. set fndrep word to this length (i.e. total length - no of spaecials)
   // (content of fndrep.word is not of importance, only length is compared)
   size_t wlen = strlen(word) - getWordSpecialCnt(word);
   char w[wlen];
@@ -47,11 +48,15 @@ bool MultiReplacer::findRepStr(char *word, repWord_t **rep) {
   repWord_t         *tmp = m_words->Head();
 
   // methodology:
-  // 1) get all words that match length exactly
-  // 2) if no words: check if there is a shorter word to use
-  // 3) if no word:  check if there is a longer word to use
-  // etc
-  // -> this should always produce a usable word, except when there are no words
+  // this is probably a bit overkill but I felt like it.
+  // create an array of function pointers to keep everything in a single (though nested) loop;
+  // result: first (outer) loop iteration, check if words match exactly,
+  //         second iteration, check if words match partially with shorter reps preferred,
+  //         third iteration, check if words match partially with longer reps 'preferred',
+  //         lastly, check if any shorter rep words exist, if this also fails, take a longer rep word.
+  // As soon as at least one valid replacement is found, exit the loop.
+  // This approach will lead to a guaranteed result, except
+  // when the rep list is empty (but this is checked elsewhere)
 
   bool (MultiReplacer::*p[5]) (repWord_t *, repWord_t *);
   bool (MultiReplacer::**func) (repWord_t *, repWord_t *);
@@ -77,6 +82,7 @@ bool MultiReplacer::findRepStr(char *word, repWord_t **rep) {
     func++;
   }
 
+  // choose a random word out of the found matches
   *rep = potentials->get_random();
   delete potentials;
   delete fndRep;

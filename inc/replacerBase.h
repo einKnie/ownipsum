@@ -118,7 +118,7 @@ protected:
     /// @brief Replace a single word with the set replacement string
     /// @note  Inheriting classes are required to implement this
     ///        If nothing special needs to be done, just call replaceSingleWord here
-    virtual void replaceWord(char *word) = 0;
+    virtual bool replaceWord(char *word) = 0;
 
   public:
     ReplacerBase();
