@@ -15,6 +15,7 @@
 #include <string.h>
 #include <errno.h>
 #include <stdarg.h>
+#include <time.h>
 
 #define VERSION "0.4"
 
@@ -283,6 +284,8 @@ int main(int argc, char *argv[]) {
   } else {
     dbg("got %d replacements words from command line\n", nW);
   }
+
+  srand(time(0));
 
   // finally, instantiate replacer
   rep = new MultiReplacer(words, nW);
