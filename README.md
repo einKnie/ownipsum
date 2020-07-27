@@ -13,7 +13,7 @@ Replacement words can either be provided directly on the command line or more co
 
 |||
 ---|---
-| **-r** | ... single replacement word with index**\*** <br>*in format \<word> \<vowel index>, e.g. -r muh 1<br>to set multiple words : -r muh 1 -r oh 0*|
+| **-r** | ... single replacement word with index __*__ <br>*in format \<word> \<vowel index>, e.g. -r muh 1<br>to set multiple words : -r muh 1 -r oh 0*|
 | **-f** | ... path to file containing one or more replacement words<br>*one word per line in format \<word> \<vowel index>, e.g. muh 1*|
 | **-i** | ... path to input text file<br>*input is read from stdin per default*|  
 | **-o** | ... path to output text file<br>*output is written to stdout per default*
@@ -52,7 +52,7 @@ To compile, cd into the repo and call <i>make -C ./proj</i>
 The resulting binary can be found in /bin.
 
 ### Repo Structure
-OwnIpsum  
+TextReplacer  
 &nbsp;&nbsp;|_ bin/   &nbsp;&nbsp;&nbsp;&nbsp;...binary files<br>
 &nbsp;&nbsp;|_ inc/   &nbsp;&nbsp;&nbsp;&nbsp;...header files<br>
 &nbsp;&nbsp;|_ proj/  &nbsp;&nbsp;&nbsp;...build files<br>
