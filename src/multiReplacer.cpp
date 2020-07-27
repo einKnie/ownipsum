@@ -73,7 +73,7 @@ bool MultiReplacer::findRepStr(char *word, repWord_t **rep) {
     while (tmp != NULL) {
       if ((this->**func)(fndRep, tmp)) {
         log_dbg("adding %s to potentials list for %s\n", tmp->word, word);
-        potentials->add(tmp);
+        potentials->addSorted(tmp);
       } else {
         log_dbg("did not add %s as potential for %s\n", tmp->word, word);
       }
@@ -82,8 +82,17 @@ bool MultiReplacer::findRepStr(char *word, repWord_t **rep) {
     func++;
   }
 
-  // choose a random word out of the found matches
-  *rep = potentials->get_random();
+  // choose one of the found matches (depending on last iteration)
+  func--;
+  if ((*func == p[3]) || (*func == p[1])) {
+    // get the longest of the shorter matches
+    *rep = potentials->Tail();
+  } else if ((func == &p[2]) || (func == &p[4])) {
+    // get the shortest of the longer matches
+    *rep = potentials->Head();
+  } else {
+    *rep = potentials->get_random();
+  }
   delete potentials;
   delete fndRep;
 
