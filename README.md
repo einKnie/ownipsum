@@ -1,15 +1,54 @@
-# Text Replacer
+# OwnIpsum
 
-Replace any given text with a predefined word.  
-This is the epitome of all that is unnecessary but at least it was fun to write.
+Transform any text into your own Lorem Ipsum-like pseudotext.
+
+## Usage
+
+Turn any given text into your own version of Lorem Ipsum!  
+
+Provide OwnIpsum with one or more (though one would be a bit boring) replacement words and some input text and watch your very own filler text be generated.  
+
+Replacement words can either be provided direclty on the command line or more comfortably from a file. The program expects input from stdin per default, but an input text file may also be supplied.
+
+### Command Line Parameters
+
+|||
+---|---
+| **-r** | ... single replacement word with index__*__<br>*in format \<word> \<vowel index>, e.g. -r muh 1*<br>*to set multiple words : -r muh 1 -r oh 0*|
+| **-f** | ... path to file containing one or more replacement words<br>*one word per line in format \<word> \<vowel index>, e.g. muh 1*|
+| **-i** | ... path to input text file<br>*input is read from stdin per default*|  
+| **-o** | ... path to output text file<br>*output is written to stdout per default*
+
+>__* Index Explanation__ In case no long enough replacement is found for a given word
+a shorter replacement is streched to length.  
+>Therefore, the index of the *strechable* character (this would usually be a vowel)
+must be provided along every replacement word.
+>> #### Example
+>> Replacement word "lorem" with index 1 and input word "advantageous" becomes "loooooooorem"  
+
+Multiple replacement words can be provided on the command line by repeating the **-r** argument.  
+` -r lorem 1 -r ipsum 3`
+
+### Examples
+Wait for input from stdin and replace every word with *lorem* in stdout  
+`> ownipsum -r lorem 1`  
+
+Read input from file *my_file.txt* and replace every word with either lorem or ipsum, then write to file *my_result.txt*  
+`> ownipsum -r lorem 1 -r ipsum 3 -i my_file.txt -o my_result.txt`  
+
+Read input from file *my_file.txt* and replace every word with a word from *words.txt* in stdout (but pipe that into *my_result.txt*)  
+`> ownipsum -f words.txt -i my_file.txt > my_result.txt`  
+
+Read input from stdin (and pipe in *my_file.txt*), replace every word with a word from *words.txt* and write the resulting text to file *my_result.txt*  
+`> ownipsum -f words.txt -o my_result.txt < my_file.txt`
+
+| *my_file.txt* | *my_result.txt* |
+| ------------  | --------------  |
+| Hello, this is a short test text to demonstrate the OwnIpsum text generator. The provided example 'words.txt' file contains all words from the original Lorem Ipsum text.| Ipsum, anim do d nulla elit nisi ut consectetur est OccAecat sint cupidatat. Sit deserunt laboris 'minim.sit' anim pariatur sed culpa sint non occaecat Culpa Culpa amet.|
 
 ## Compilation
 
-### Prerequisites
-This program uses the logging functionality provided by [Logger](https://github.com/einKnie/Logger).  
-Clone the [Logger](https://github.com/einKnie/Logger) repo to your machine and compile the library. Then change the variable LIB_DIR of the RoomExplorer's Makefile to point to the libcpplogging library.
 
-### Compilation
 To compile, cd into the repo and call <i>make -C ./proj</i>
 The resulting binary can be found in /bin.
 
@@ -20,9 +59,3 @@ TextReplacer
 &nbsp;&nbsp;|_ proj/  &nbsp;&nbsp;&nbsp;...build files<br>
 &nbsp;&nbsp;|_ src/   &nbsp;&nbsp;&nbsp;&nbsp;...source files<br>
 
-### Example
-
-    Replacer *rep = new Replacer();
-    
-    // set the replacement text. The second parameter specifies the index of the vowel
-    rep->setText("muh", 1);
