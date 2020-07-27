@@ -8,7 +8,7 @@ Turn any given text into your own version of Lorem Ipsum!
 
 Provide OwnIpsum with one or more (though one would be a bit boring) replacement words and some input text and watch your very own filler text be generated.  
 
-Replacement words can either be provided direclty on the command line or more comfortably from a file. The program expects input from stdin per default, but an input text file may also be supplied.
+Replacement words can either be provided directly on the command line or more comfortably from a file. The program expects input from stdin per default, but an input text file may also be supplied.
 
 ### Command Line Parameters
 
@@ -20,8 +20,8 @@ Replacement words can either be provided direclty on the command line or more co
 | **-o** | ... path to output text file<br>*output is written to stdout per default*
 
 >__* Index Explanation__ In case no long enough replacement is found for a given word
-a shorter replacement is streched to length.  
->Therefore, the index of the *strechable* character (this would usually be a vowel)
+a shorter replacement is stretched to length.  
+>Therefore, the index of the *stretchable* character (this would usually be a vowel)
 must be provided along every replacement word.
 >> #### Example
 >> Replacement word "lorem" with index 1 and input word "advantageous" becomes "loooooooorem"  
