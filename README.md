@@ -43,7 +43,7 @@ Read input from stdin (and pipe in *my_file.txt*), replace every word with a wor
 
 | *my_file.txt* | *my_result.txt* |
 | ------------  | --------------  |
-| Hello, this is a short test text to demonstrate the OwnIpsum text generator. The provided example 'words.txt' file contains all words from the original Lorem Ipsum text.| Ipsum, anim do d nulla elit nisi ut consectetur est OccAecat sint cupidatat. Sit deserunt laboris 'minim.sit' anim pariatur sed culpa sint non occaecat Culpa Culpa amet.|
+| Hello, this is a short test text to demonstrate the OwnIpsum text generator. The provided example 'words.txt' file contains all words from the original Lorem Ipsum text.|Velit, sunt ut d magna esse sint ea consectetur est ParIatur amet consequat. Qui proident eiusmod 'irure.est' nisi pariatur est dolor esse est proident Ipsum Nulla nisi.|
 
 ## Compilation
 
