@@ -19,12 +19,12 @@ MultiReplacer::~MultiReplacer() {
 bool MultiReplacer::replaceWord(char *word) {
   repWord_t *rep;
   if (!findRepStr(word, &rep)) {
-    printf("error: could not find a suitable rep string for word %s\n", word);
+    printf("Error: Could not find a suitable rep string for word %s\n", word);
     return false;
   }
 
   if (!setText(rep->word, rep->idx)) {
-    printf("error: failed to set replacement word %s(%d)\n", rep->word, rep->idx);
+    printf("Error: Failed to set replacement word %s(%d)\n", rep->word, rep->idx);
     return false;
   }
 
@@ -88,7 +88,7 @@ bool MultiReplacer::findRepStr(char *word, repWord_t **rep) {
   delete fndRep;
 
   if (*rep == NULL) {
-    printf("\033[0;31mError: found no rep string\033[0m\n");
+    log_dbg("found no rep string\n");
     return false;
   }
   return true;

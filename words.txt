@@ -1,0 +1,69 @@
+# Example Replacement Word List
+# The program expects each line to have exactly one word and one index after another
+# Empty lines are skipped and you may insert comments by starting a line with '#'
+
+
+# following are the original lorem ipsum words
+lorem 1
+ipsum 3
+dolor 3
+sit 1
+amet 2
+consectetur 9
+adipiscing 4
+elit 2
+sed 1
+do 1
+eiusmod 1
+tempor 4
+incididunt 3
+ut 0
+labore 5
+et 0
+dolore 5
+magna 1
+aliqua 5
+enim 2
+ad 0
+minim 1
+veniam 1
+quis 2
+nostrud 5
+exercitation 0
+ullamco 6
+laboris 3
+nisi 1
+aliquip 5
+ex 0
+ea 0
+commodo 4
+consequat 7
+duis 1
+aute 0
+irure 2
+in 0
+reprehenderit 1
+voluptate 6
+velit 1
+esse 3
+cillum 4
+eu 0
+fugiat 1
+nulla 1
+pariatur 6
+excepteur 3
+sint 1
+occaecat 3
+cupidatat 7
+non 1
+proident 2
+sunt 1
+culpa 4
+qui 2
+officia 3
+deserunt 3
+mollit 4
+anim 0
+id 0
+est 0
+laborum 5

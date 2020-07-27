@@ -23,7 +23,7 @@ ReplacerBase::~ReplacerBase() {
   if (m_start)  free(m_start);
   if (m_middle) free(m_middle);
   if (m_end)    free(m_end);
-  log_dbg("destroyed replacer base\n");
+  log_dbg("Destroyed replacer base\n");
 }
 
 void ReplacerBase::setDefaultText() {
@@ -105,23 +105,21 @@ char* ReplacerBase::change(const char *fmt) {
           m_output[ccnt] = '\0';
           state = EDone;
         } else if (isFormat(fmt[ccnt])) {
-        // } else if (fmt[ccnt] == '%') {
           state = EFmt;
         } else if (isSpecial(fmt[ccnt])) {
           state = ESpecial;
         } else if (isWord(fmt[ccnt])) {
-        // } else if (fmt[ccnt] != ' ') {
           state = EWord;
         } else if (isSpace(fmt[ccnt])) {
-          // basically to catch spaces
           m_output[ccnt] = fmt[ccnt];
           ccnt++;
         } else {
-          printf("error: don't know how to interpret %c\n", fmt[ccnt]);
+          printf("Error: Don't know how to interpret %c in input\n", fmt[ccnt]);
           exit(1);
         }
         break;
 
+      // TODO feeling cute, might deprecate later
       case EFmt:
         log_dbg("in state EFmt\n");
         do {
@@ -140,14 +138,13 @@ char* ReplacerBase::change(const char *fmt) {
           wcnt++;
           ccnt++;
         } while (isWord(fmt[ccnt]));
-        // } while ((fmt[ccnt] != ' ') && (fmt[ccnt] != '\0') && !isSpecial(fmt[ccnt]));
         word[wcnt] = '\0';
 
         // replace word
         log_dbg("word found: %s\n", word);
         replaceWord(word);
 
-        // then add to m_output
+        // then add to output
         log_dbg("replaced with: %s\n", word);
         log_dbg("ccnt: %d\nwcnt: %d\ninsert at: %d\n", ccnt, wcnt, (ccnt - wcnt));
         memcpy(&m_output[ccnt - wcnt], word, wcnt);
@@ -175,6 +172,7 @@ char* ReplacerBase::change(const char *fmt) {
   } //while
 
   log_dbg("%s\n", fmt);
+  free(word);
   return m_output;
 }
 
@@ -225,19 +223,19 @@ void ReplacerBase::replaceSingleWord(char *word) {
     // determine when to start with vowel
     vIdx = strlen(m_start);
     mid_idx = vIdx;
-    while ( (mid_idx - getWordSpecialUntil(word, mid_idx)) < vIdx) {
+    while ((mid_idx - getWordSpecialUntil(word, mid_idx)) < vIdx) {
       mid_idx++;
     }
 
     // determine when to sart with end
     end_idx = wlen - strlen(m_end);
-    while (( (wlen - end_idx) - getWordSpecialFrom(word, end_idx)) < (int)strlen(m_end)) {
+    while (((wlen - end_idx) - getWordSpecialFrom(word, end_idx)) < (int)strlen(m_end)) {
       end_idx--;
       if (end_idx == 0) break;
     }
 
     // check if there's still enough room for end part
-    if ( (end_idx <= mid_idx) || ((end_idx - mid_idx) < (getWordSpecialFromUntil(word, mid_idx, end_idx) + 1)) ) {
+    if ((end_idx <= mid_idx) || ((end_idx - mid_idx) < (getWordSpecialFromUntil(word, mid_idx, end_idx) + 1))) {
       end_idx = wlen;
     }
 
@@ -249,12 +247,13 @@ void ReplacerBase::replaceSingleWord(char *word) {
     end_idx = vIdx;
 
     // determine end index depending on special chars
-    while (( end_idx - getWordSpecialUntil(word, end_idx) ) < vIdx) {
+    while ((end_idx - getWordSpecialUntil(word, end_idx)) < vIdx) {
       end_idx++;
     }
 
   } else {
     log_dbg("invalid vowel\n");
+    return;
   }
 
   log_dbg("wlen: %d\nvowel Index: %d\nmid_idx: %d\nend_idx: %d\n",
@@ -262,6 +261,7 @@ void ReplacerBase::replaceSingleWord(char *word) {
   log_dbg("start len: %lu\nmid len: %lu\nend len: %lu\n",
           strlen(m_start), strlen(m_middle), strlen(m_end));
 
+  // replace word char for char
   for (uint8_t i = 0; i < wlen; i++) {
 
     if (isNumeric(word[i]) || isWordSpecial(word[i])) continue;
