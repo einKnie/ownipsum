@@ -202,6 +202,8 @@ int main(int argc, char *argv[]) {
         printf("Ignoring unrecognized command line option -%c\n", optopt);
         break;
     }
+    if (repstr) { free(repstr); repstr = NULL; }
+    if (idxstr) { free(idxstr); idxstr = NULL; }
   }
 
   // verify command line arguments
