@@ -5,7 +5,7 @@ Aute sed lorem enim elit nisi sed aliquip in Ipsum Irure!
 
 ## Usage
 
-Provide OwnIpsum with one or more (though one would be a bit boring) replacement words and some input text and watch your very own filler text be generated.  
+Provide OwnIpsum with one or more (though one would be a bit boring) replacement words and some input text and watch your very own dummy text be generated.  
 
 Replacement words can either be provided directly on the command line or more comfortably from a file. The program expects input from stdin per default, but an input text file may also be supplied.
 
@@ -21,7 +21,7 @@ Replacement words can either be provided directly on the command line or more co
 >__* Index Explanation__ In case no long enough replacement is found for a given word
 a shorter replacement is stretched to length.  
 >Therefore, the index of the *stretchable* character (this would usually be a vowel)
-must be provided along every replacement word.
+must be provided along with every replacement word.
 >> #### Example
 >> Replacement word "lorem" with index 1 and input word "advantageous" becomes "loooooooorem"  
 
@@ -47,7 +47,6 @@ Read input from stdin (and pipe in *my_file.txt*), replace every word with a wor
 
 ## Compilation
 
-
 To compile, cd into the repo and call <i>make -C ./proj</i>
 The resulting binary can be found in /bin.
 
@@ -57,3 +56,7 @@ TextReplacer
 &nbsp;&nbsp;|_ inc/   &nbsp;&nbsp;&nbsp;&nbsp;...header files<br>
 &nbsp;&nbsp;|_ proj/  &nbsp;&nbsp;&nbsp;...build files<br>
 &nbsp;&nbsp;|_ src/   &nbsp;&nbsp;&nbsp;&nbsp;...source files<br>
+
+## Known Bugs
+
+ * multibyte characters in input are not detected correctly and are replaced with two characters in output (*ojä* with replacement *muh* becomes *muuh*)

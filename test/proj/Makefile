@@ -1,6 +1,6 @@
 SRC_DIR     = ../src
 INC_DIR     = ../inc
-DUT_DIR			= ../../inc
+DUT_DIR			= ../../
 TARGET_DIR  = ../bin
 OBJ_DIR     = ../bin/obj
 TARGET      = testout
@@ -9,13 +9,15 @@ TEST_TARGET = out
 TEST_TARGET_DIR = $(TARGET_DIR)
 
 CC          = g++
-CFLAGS      = -Wall -std=c++11 -pedantic -Wno-unused-function -g -I$(INC_DIR) -I$(DUT_DIR)
+CFLAGS      = -Wall -std=c++11 -Wno-unused-function -I$(INC_DIR) -I$(DUT_DIR)/inc
 LIBS        =
 LIB_FLAGS   =
 
-SRCS   = $(SRC_DIR)/main.cpp $(SRC_DIR)/testcases.cpp $(SRC_DIR)/strings.cpp $(DUT_DIR)/../src/replacer.cpp
+#SRCS   = $(SRC_DIR)/main.cpp $(SRC_DIR)/testcases.cpp $(SRC_DIR)/strings.cpp $(DUT_DIR)/../src/replacer.cpp
+SRCS   = $(SRC_DIR)/main.cpp $(SRC_DIR)/testcases.cpp $(SRC_DIR)/strings.cpp
+SRCS   += $(DUT_DIR)/src/replacer.cpp $(DUT_DIR)/src/replacerBase.cpp $(DUT_DIR)/src/multiReplacer.cpp
 OBJ    = $(patsubst $(SRC_DIR)/%.cpp, $(OBJ_DIR)/%.o, $(SRCS))
-DEPS   = $(patsubst %,$(DUT_DIR)/%.h, *)
+DEPS   = $(patsubst %,$(DUT_DIR)/inc/%.h, *)
 
 
 .PHONY: all clean test
