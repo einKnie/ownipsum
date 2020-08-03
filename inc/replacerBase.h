@@ -110,6 +110,16 @@ protected:
     /// @return true if valid, false otherwise
     bool isValidReplacement(char *str);
 
+    /// @brief Return number of multibyte chaacters in string \a word
+    /// @param [in] word
+    /// @return number of multibyte chars
+    int getMultibyteChars(char *word);
+
+    /// @brief Check if a given character \a c is part of a multibyte character
+    /// @param [in] c a character
+    /// @return true if multibyte, false otherwise
+    bool isMultibyteChar(char c);
+
     /// @brief Replace a single word with the set replacement string
     /// @param [in, out] word the word to replace
     /// @note The string \a word is changed in-place

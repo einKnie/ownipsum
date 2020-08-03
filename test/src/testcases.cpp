@@ -26,6 +26,14 @@
  *    (not sure if i have already implemented this, but use the sorting feature of lilist for storing the repwords!(sort by length, obvs))
  */
 
+ /*
+ * TODO: Property based testing!! [https://www.youtube.com/watch?v=IYzDFHx6QPY]
+ *  don't (only) use examples for testing, rather test if the function satisfies its most basic properties,
+ *  e.g. * every word in the output text must be as long as the corresponding word in the input text
+ *       * the output text must contain exactly as many words as the input text
+ *       * every word in the output text must - when special chars are removed - be a word from the rep list
+ */
+
 // HELPER FUNCS
 void logRepResult(const char *in, const char *out, const char *expect) {
   UNSCOPED_INFO("Input:\t" << in);
@@ -42,9 +50,11 @@ void testStrings(Replacer* rep, const stringCombo_t* strings, int len) {
    REQUIRE(r == true);
 
    char *result = rep->change(obj->in);
-   logRepResult(obj->in, result, obj->out);
 
+   logRepResult(obj->in, result, obj->out);
    REQUIRE(strlen(result) == strlen(obj->out));
+
+   logRepResult(obj->in, result, obj->out);
    REQUIRE((memcmp(result, obj->out, strlen(result))) == 0);
   }
 }
@@ -184,25 +194,13 @@ SCENARIO("Known bugs are reproduced", "[!shouldfail]") {
 
     INFO("This is a bug and should be fixed");
 
-    /// BUG#1: incorrect treatment of multibyte characters
-    WHEN("A text containing a multibyte character (e.g. 'ö') is changed") {
-      char text[]     = "Das ist aber blöd.";
-      char expected[] = "Muh muh muuh muuh.";
-      char *result    = rep->change(text);
+    // insert bug reproduction here
 
-      THEN("The multibyte char is treated as a single character") {
-        INFO("Bug#1: Incorrect treatment of multibyte characters");
-
-        logRepResult(text, result, expected);
-        REQUIRE(strlen(result) == strlen(expected));
-        REQUIRE((memcmp(result, expected, strlen(expected))) == 0);
-
-        FAIL("--> !!This bug might be fixed!!");
-      }
-    }
 
     delete rep;
   }
+
+  FAIL("expected failure: no open bugs");
 }
 
 SCENARIO("Old (fixed) bugs are tested") {
@@ -214,6 +212,22 @@ SCENARIO("Old (fixed) bugs are tested") {
   GIVEN("A new Replacer object with default repstring") {
     Replacer *rep = new Replacer();
     REQUIRE(rep != NULL);
+
+    /// BUG#1: incorrect treatment of multibyte characters
+    WHEN("A text containing a multibyte character (e.g. 'ö') is changed") {
+      char text[]     = "Das ist aber blöd.";
+      char expected[] = "Muh muh muuh muuh.";
+      char *result    = rep->change(text);
+
+      THEN("The multibyte char is treated as a single character") {
+        INFO("[FIXED]Bug#1: Incorrect treatment of multibyte characters");
+
+        logRepResult(text, result, expected);
+        REQUIRE(strlen(result) == strlen(expected));
+        REQUIRE((memcmp(result, expected, strlen(expected))) == 0);
+
+      }
+    }
 
     /// BUG#2: No fallback to defaults on error
     WHEN("A valid replacement string is set") {

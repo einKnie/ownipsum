@@ -84,6 +84,8 @@ char* ReplacerBase::change(const char *fmt) {
   int16_t  ccnt = 0;
   int16_t  wcnt = 0;
   size_t   len = ((strlen(fmt) + 1) * sizeof(char));
+  size_t   lenred = 0;
+  size_t   lenred_total = 0;
 
   while (state != EDone) {
 
@@ -102,7 +104,7 @@ char* ReplacerBase::change(const char *fmt) {
       case ECheck:
         log_dbg("in state ECheck: %c\n", fmt[ccnt]);
         if (fmt[ccnt] == '\0') {
-          m_output[ccnt] = '\0';
+          m_output[ccnt - lenred_total] = '\0';
           state = EDone;
         } else if (isFormat(fmt[ccnt])) {
           state = EFmt;
@@ -111,7 +113,7 @@ char* ReplacerBase::change(const char *fmt) {
         } else if (isWord(fmt[ccnt])) {
           state = EWord;
         } else if (isSpace(fmt[ccnt])) {
-          m_output[ccnt] = fmt[ccnt];
+          m_output[ccnt - lenred_total] = fmt[ccnt];
           ccnt++;
         } else {
           printf("Error: Don't know how to interpret %c in input\n", fmt[ccnt]);
@@ -123,7 +125,7 @@ char* ReplacerBase::change(const char *fmt) {
       case EFmt:
         log_dbg("in state EFmt\n");
         do {
-          m_output[ccnt] = fmt[ccnt];
+          m_output[ccnt - lenred_total] = fmt[ccnt];
           ccnt++;
         } while ((fmt[ccnt] != ' ') && (fmt[ccnt] != '\0'));
 
@@ -141,13 +143,16 @@ char* ReplacerBase::change(const char *fmt) {
         word[wcnt] = '\0';
 
         // replace word
+        lenred = getMultibyteChars(word);
         log_dbg("word found: %s\n", word);
         replaceWord(word);
 
         // then add to output
         log_dbg("replaced with: %s\n", word);
-        log_dbg("ccnt: %d\nwcnt: %d\ninsert at: %d\n", ccnt, wcnt, (ccnt - wcnt));
-        memcpy(&m_output[ccnt - wcnt], word, wcnt);
+        log_dbg("ccnt: %d\nwcnt: %ld\ninsert at: %ld\n", ccnt, wcnt - lenred, (ccnt - wcnt - lenred_total));
+        log_dbg("length reduction in this word: %ld\nlength reduction total: %ld\n", lenred, lenred_total);
+        memcpy(&m_output[ccnt - wcnt - lenred_total], word, wcnt - lenred);
+        lenred_total += lenred;
 
         state = ECheck;
         break;
@@ -155,7 +160,7 @@ char* ReplacerBase::change(const char *fmt) {
       case ESpecial:
         log_dbg("in state ESpecial\n");
         do {
-          m_output[ccnt] = fmt[ccnt];
+          m_output[ccnt - lenred_total] = fmt[ccnt];
           ccnt++;
         } while(isSpecial(fmt[ccnt]));
         state = ECheck;
@@ -190,6 +195,12 @@ void ReplacerBase::replaceSingleWord(char *word) {
     // we have to adapt the indices accordingly.
     // e.g. "mu(uuu)h" w/ repword mama(3) shall become "ma(maa)a"
     log_dbg("word contains special characters\n");
+  }
+
+  int n = 0;
+  if ((n = getMultibyteChars(word)) > 0) {
+    log_dbg("%s has %d multibyte chars\n", word, n);
+    wlen -= n;
   }
 
   uint8_t vIdx = 0;
@@ -262,28 +273,43 @@ void ReplacerBase::replaceSingleWord(char *word) {
           strlen(m_start), strlen(m_middle), strlen(m_end));
 
   // replace word char for char
-  for (uint8_t i = 0; i < wlen; i++) {
+  uint8_t i, j = 0;
+  for (i = 0, j = 0; i < strlen(word) && j < wlen; i++, j++) {
 
     if (isNumeric(word[i]) || isWordSpecial(word[i])) continue;
 
-    if (i < mid_idx) {
+    if (j < mid_idx) {
       special_offs = getWordSpecialFromUntil(word, 0, i);
-      c = m_start[i - special_offs];
+      c = m_start[j - special_offs];
       log_dbg("replaced start char %c\n", c);
-    } else if ((i >= mid_idx) && (i < end_idx)) {
+    } else if ((j >= mid_idx) && (j < end_idx)) {
       special_offs = getWordSpecialFromUntil(word, mid_idx, i);
-      c = m_middle[i - mid_idx - special_offs];
+      c = m_middle[j - mid_idx - special_offs];
       log_dbg("replaced middle char %c\n", c);
-    } else if (i >= end_idx) {
+    } else if (j >= end_idx) {
       special_offs = getWordSpecialFromUntil(word, end_idx, i);
-      c = m_end[i - end_idx - special_offs];
+      c = m_end[j - end_idx - special_offs];
       log_dbg("replaced end char %c\n", c);
     }
 
+    if (isMultibyteChar(word[i])) {
+      log_dbg("multibyte char at idx %d\n", i);
+      i++;
+    }
+
     special_offs = 0;
-    word[i] = isUpper(word[i]) ? toUpper(c) : c;
-    log_dbg("i: %d, wordlen: %lu\n", i, strlen(word));
+    word[j] = isUpper(word[j]) ? toUpper(c) : c;
+    log_dbg("i: %d, j: %d, wordlen: %lu\n", i, j, strlen(word));
+
+
+
   }
+
+  log_dbg("END OF WORD: i = %d, j = %d\n", i, j);
+  if (wlen < strlen(word)) {
+    word[j] = '\0';
+  }
+
 }
 
 char ReplacerBase::toUpper(char c) {
@@ -393,4 +419,24 @@ bool ReplacerBase::isValidReplacement(char *str) {
     c++;
   }
   return true;
+}
+
+int ReplacerBase::getMultibyteChars(char *word) {
+  size_t len = strlen(word);
+  int n = 0;
+  for (size_t i = 0; i < len; i++) {
+    if (word[i] & 0x80) {
+#ifndef _NO_DEBUG_
+      char mb[3] = { word[i], word[i+1], '\0'};
+      log_dbg("0x%X 0x%X -> %s\n", word[i], word[i+1], mb);
+#endif
+      n++;
+      i++;
+    }
+  }
+  return n;
+}
+
+bool ReplacerBase::isMultibyteChar(char c) {
+  return (c & 0x80);
 }
