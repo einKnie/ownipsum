@@ -59,4 +59,4 @@ TextReplacer
 
 ## Known Bugs
 
- * multibyte characters in input are not detected correctly and are replaced with two characters in output (*ojä* with replacement *muh* becomes *muuh*)
+ * [FIXED]~~multibyte characters in input are not detected correctly and are replaced with two characters in output (*ojä* with replacement *muh* becomes *muuh*)~~
