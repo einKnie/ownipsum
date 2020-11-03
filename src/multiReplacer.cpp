@@ -47,6 +47,10 @@ bool MultiReplacer::findRepStr(char *word, repWord_t **rep) {
   repWord_t         *fndRep = new repWord_t(w, 0);
   repWord_t         *tmp = m_words->Head();
 
+  if (tmp == NULL) {
+    return false;
+  }
+
   // methodology:
   // this is probably a bit overkill but I felt like it.
   // create an array of function pointers to keep everything in a single (though nested) loop;
@@ -67,7 +71,7 @@ bool MultiReplacer::findRepStr(char *word, repWord_t **rep) {
   p[4] = &MultiReplacer::isLonger;
   func = p;
 
-  while (potentials->Size() == 0) { // this is of course a bit risky, but logically after the third loop potentials MUST contain at least one element
+  while (potentials->Size() == 0) { // this is of course a bit risky, but logically after the last loop potentials MUST contain at least one element
     tmp = m_words->Head();
 
     while (tmp != NULL) {
