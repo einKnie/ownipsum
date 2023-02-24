@@ -37,9 +37,9 @@ bool MultiReplacer::findRepStr(char *word, repWord_t **rep) {
 
   // find correct-length rep words even with in-word specials by
   // 1. get no of specials in word
-  // 2. set fndrep word to this length (i.e. total length - no of spaecials)
+  // 2. set fndrep word to this length (i.e. total length - no of spaecials - no of multibyte characters)
   // (content of fndrep.word is not of importance, only length is compared)
-  size_t wlen = strlen(word) - getWordSpecialCnt(word);
+  size_t wlen = strlen(word) - getWordSpecialCnt(word) - getMultibyteChars(word);
   char w[wlen];
   memset(w, 'a', wlen);
   w[wlen] = '\0';
