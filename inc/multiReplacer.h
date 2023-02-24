@@ -5,6 +5,7 @@
 #include "lilist.h"
 #include <string.h>
 
+/// Replacement Word
 typedef struct RepWord {
   char word[MAX_REPLEN];
   unsigned int idx;
@@ -16,6 +17,10 @@ typedef struct RepWord {
 
   RepWord() : RepWord("\0", 0) { }
 
+  // define comparison operators to check length
+  // since this is all we're interested in when comparing words
+  // (keep in mind that this messes with the 'find()' functionality
+  // of the linked list, don't use find() #todo: update linked list to compare e.g. a repr() function?)
   bool operator== (const RepWord &other) {
     return (strlen(word) == strlen(other.word));
   }
@@ -38,6 +43,7 @@ private:
 
   /// @brief Replace a given word \a word with a suitable replacement
   /// @param [in/out] word
+  /// @return false on error, true on success
   bool replaceWord(char* word);
 
   /// @brief Find a suiting replacement for a given \a word

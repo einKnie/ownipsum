@@ -94,6 +94,12 @@ char* ReplacerBase::change(const char *fmt) {
         log_dbg("in state EInit\n");
         m_output = (char*)realloc(m_output, len);
         word     = (char*)realloc(word, len);
+
+        if ((m_output == NULL) || (word == NULL)) {
+          printf("Error: Failed to reallocate memory\n");
+          exit(1);
+        }
+
         memset(m_output, 0, len);
         memset(word, 0, len);
         state = ECheck;
@@ -136,9 +142,7 @@ char* ReplacerBase::change(const char *fmt) {
         log_dbg("in state EWord\n");
         wcnt = 0;
         do {
-          word[wcnt] = fmt[ccnt];
-          wcnt++;
-          ccnt++;
+          word[wcnt++] = fmt[ccnt++];
         } while (isWord(fmt[ccnt]));
         word[wcnt] = '\0';
 
@@ -147,7 +151,7 @@ char* ReplacerBase::change(const char *fmt) {
         log_dbg("word found: %s\n", word);
         replaceWord(word);
 
-        // then add to output
+        // then add to output and take into account the length reduction from multibyte chars in input
         log_dbg("replaced with: %s\n", word);
         log_dbg("ccnt: %d\nwcnt: %ld\ninsert at: %ld\n", ccnt, wcnt - lenred, (ccnt - wcnt - lenred_total));
         log_dbg("length reduction in this word: %ld\nlength reduction total: %ld\n", lenred, lenred_total);
@@ -238,7 +242,7 @@ void ReplacerBase::replaceSingleWord(char *word) {
       mid_idx++;
     }
 
-    // determine when to sart with end
+    // determine when to start with end
     end_idx = wlen - strlen(m_end);
     while (((wlen - end_idx) - getWordSpecialFrom(word, end_idx)) < (int)strlen(m_end)) {
       end_idx--;
@@ -276,7 +280,7 @@ void ReplacerBase::replaceSingleWord(char *word) {
   uint8_t i, j = 0;
   for (i = 0, j = 0; i < strlen(word) && j < wlen; i++, j++) {
 
-    if (isNumeric(word[i]) || isWordSpecial(word[i])) continue;
+    if (isWordSpecial(word[i])) continue;
 
     if (j < mid_idx) {
       special_offs = getWordSpecialFromUntil(word, 0, i);
@@ -300,9 +304,6 @@ void ReplacerBase::replaceSingleWord(char *word) {
     special_offs = 0;
     word[j] = isUpper(word[j]) ? toUpper(c) : c;
     log_dbg("i: %d, j: %d, wordlen: %lu\n", i, j, strlen(word));
-
-
-
   }
 
   log_dbg("END OF WORD: i = %d, j = %d\n", i, j);
@@ -337,6 +338,9 @@ bool ReplacerBase::isFormat(char c) {
 bool ReplacerBase::isSpace(char c) {
   return (c == ' ') ? true : false;
 }
+
+// todo: find some meaningful way to decide && discern which chars are
+// 'special' and which are 'word special' because none of this is based on any reasoning
 
 bool ReplacerBase::isSpecial(char c) {
 

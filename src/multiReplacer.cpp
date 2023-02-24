@@ -60,7 +60,7 @@ bool MultiReplacer::findRepStr(char *word, repWord_t **rep) {
   //         lastly, check if any shorter rep words exist, if this also fails, take a longer rep word.
   // As soon as at least one valid replacement is found, exit the loop.
   // This approach will lead to a guaranteed result, except
-  // when the rep list is empty (but this is checked elsewhere)
+  // when the rep list is empty (but this is checked above)
 
   bool (MultiReplacer::*p[5]) (repWord_t *, repWord_t *);
   bool (MultiReplacer::**func) (repWord_t *, repWord_t *);
@@ -95,6 +95,7 @@ bool MultiReplacer::findRepStr(char *word, repWord_t **rep) {
     // get the shortest of the longer matches
     *rep = potentials->Head();
   } else {
+    // get any of the exact matches
     *rep = potentials->get_random();
   }
   delete potentials;
