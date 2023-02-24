@@ -1,6 +1,7 @@
 #include "../inc/catch.hpp"
 
 #include "replacer.h"   // DUT
+#include "multiReplacer.h" // multi DUT
 #include "strings.cpp"  // test strings
 
 #include <string.h>     // memcmp
@@ -48,6 +49,24 @@ void testStrings(Replacer* rep, const stringCombo_t* strings, int len) {
    obj = &strings[i];
    bool r = rep->setText(obj->rep.word, obj->rep.idx);
    REQUIRE(r == true);
+
+   char *result = rep->change(obj->in);
+
+   logRepResult(obj->in, result, obj->out);
+   REQUIRE(strlen(result) == strlen(obj->out));
+
+   logRepResult(obj->in, result, obj->out);
+   REQUIRE((memcmp(result, obj->out, strlen(result))) == 0);
+  }
+}
+
+void testMultiStrings(MultiReplacer *rep, const multiStringCombo_t* strings, int len) {
+  const multiStringCombo_t *obj = NULL;
+
+  for (int i = 0; i < len; i++) {
+   obj = &strings[i];
+  //  MultiReplacer *rep = new MultiReplacer(obj->rep, MAX_REP);
+  //  REQUIRE(rep != NULL);
 
    char *result = rep->change(obj->in);
 
@@ -156,6 +175,93 @@ SCENARIO("A wide array of test strings are converted") {
     }
 
     delete rep;
+  }
+}
+
+// TESTCASES MULTIREPLACER
+
+SCENARIO("A MultiReplacer is created and different replacement words are set") {
+
+  GIVEN("A new Mutireplacer with valid repwords of the same length") {
+
+    repWord_t words[3] = { {"ach", 0}, {"muh", 1}, {"bla", 2}};
+
+    MultiReplacer *rep = new MultiReplacer(words, 3);
+    REQUIRE(rep != NULL);
+
+    WHEN("a given teststring is converted") {
+      char input[] = "das ist krz";
+      char *result = rep->change(input);
+
+      logRepResult(input, result, "");
+      REQUIRE(strlen(result) == strlen(input));
+
+      THEN("different replacement words from the list shall be used randomly") {
+        char* tok = strtok(result, " ");
+        REQUIRE(tok != NULL);
+
+        // maybe tokenize and check something? but technically, same word every time would also be a valid option
+        do {
+          // at least check that the rep words were used
+          if (!(strncmp(tok, words[0].word, strlen(tok)) == 0) &&
+              !(strncmp(tok, words[1].word, strlen(tok)) == 0) &&
+              !(strncmp(tok, words[2].word, strlen(tok)) == 0)) {
+                FAIL("Invalid rep word used");
+              }
+        } while ((tok = strtok(NULL, " ")));
+      }
+    }
+  }
+
+  GIVEN("A new Multireplacer with different length words") {
+
+    repWord_t words[3] = { {"oder", 2}, {"muh", 1}, {"oi", 0}};
+
+    MultiReplacer *rep = new MultiReplacer(words, 3);
+    REQUIRE(rep != NULL);
+
+    WHEN("A string with same legth words is replaced") {
+      char text[] = "ja, ich kann.";
+      char expectedResult[] = "oi, muh oder.";
+      char* result = rep->change(text);
+
+      logRepResult(text, result, expectedResult);
+      REQUIRE(strlen(result) == strlen(expectedResult));
+
+      THEN("the lenght-matching words must be used for each input word") {
+        REQUIRE(memcmp(result, expectedResult, strlen(expectedResult)) == 0);
+      }
+    }
+
+    WHEN("A string with a longer word is replaced") {
+      char text[] = "da ist mutti";
+      char expectedResult[] = "oi muh odeer";
+      char* result = rep->change(text);
+
+      logRepResult(text, result, expectedResult);
+      REQUIRE(strlen(result) == strlen(expectedResult));
+
+      THEN("a shorter replacement word must be streched to length") {
+        REQUIRE(memcmp(result, expectedResult, strlen(expectedResult)) == 0);
+      }
+    }
+  }
+}
+
+SCENARIO("The MultiReplacer is tested with different input strings") {
+  GIVEN("A new MultiReplacer with three replacement words") {
+
+    // reps for multireplacer tests
+    repWord_t multiReps[] = {{"ach", 0}, {"krach", 2}, {"schach", 3}};
+
+    int len = strSize();
+    const multiStringCombo_t *strings = multiStrings;
+    MultiReplacer *rep = new MultiReplacer(&multiReps[0], MAX_REP);
+    REQUIRE(rep != NULL);
+
+    THEN("All test strings must be converted correctly") {
+      testMultiStrings(rep, strings, len);
+    }
   }
 }
 
